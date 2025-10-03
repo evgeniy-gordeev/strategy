@@ -86,6 +86,7 @@ if base_available < min_amount:
 print(f"BITGET - Доступно {usdt_available} {quote} — покупаем {base_available} {base}")
 
 try:
+    print(f"BITGET - Подготовка к покупке {base_available} {base} за {usdt_available} {quote}")
     exchange.options['createMarketBuyOrderRequiresPrice'] = False
 
     order = exchange.create_market_buy_order(
@@ -94,14 +95,20 @@ try:
         params={'createMarketBuyOrderRequiresPrice': False}
     )
     
+    print(f"BITGET - Ордер создан: {order['id']}")
     detailed_order = exchange.fetch_order(order['id'], symbol)
     print(f"BITGET - ✅ Куплено: {detailed_order['filled']} {base} по цене {detailed_order['average']} USDT")
     print(f"FILLED_AMOUNT:{detailed_order['filled']}")
 
 except Exception as e:
     message = str(e)
+    print(f"BITGET - ❌ Детальная ошибка: {e.__class__.__name__}: {message}")
+    
     if "minimum transaction volume" in message:
         print(f"BITGET - Сделка отклонена: объём меньше минимального ({symbol}, {base_available} USDT)")
     else:
         print(f"BITGET - ❌ Ошибка при создании ордера: {e.__class__.__name__}: {message}")
+    
+    # Выводим FILLED_AMOUNT:0 даже при ошибке
+    print("FILLED_AMOUNT:0")
     sys.exit(1)

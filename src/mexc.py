@@ -17,7 +17,7 @@ exchange = ccxt.mexc({
 try:
     symbol = sys.argv[1]
     deposit = int(sys.argv[2])
-    # symbol = 'XAR/USDT'
+    # symbol = 'REX/USDT'
     # deposit = 10
     if deposit <= 0 or '/' not in symbol:
         raise ValueError
@@ -88,21 +88,30 @@ if liquidity < usdt_available:
     sys.exit(1)
 
 try:
+    print(f"MEXC - Подготовка к покупке {base_available} {base} за {usdt_available} {quote}")
     order = retry_call(exchange.create_market_buy_order, symbol=symbol, amount=base_available)
+    
+    print(f"MEXC - Ордер создан: {order['id']}")
     # Получаем детали ордера
     order_details = retry_call(exchange.fetch_order, order['id'], symbol)
     filled = order_details.get('filled')
     cost = order_details.get('cost')
     if not filled or not cost:
         print("MEXC - ❌ Сделка не исполнена — недостаточно ликвидности")
+        print("FILLED_AMOUNT:0")
         sys.exit(1)
     print(f"MEXC - ✅ Куплено по рынку {order_details['filled']} {order_details['symbol'].replace('/', '')}")
     # Выводим количество для передачи в основной скрипт
     print(f"FILLED_AMOUNT:{order_details['filled']}")
 except Exception as e:
     message = str(e)
+    print(f"MEXC - ❌ Детальная ошибка: {e.__class__.__name__}: {message}")
+    
     if "minimum transaction volume" in message:
         print(f"MEXC - Сделка отклонена: объём меньше минимального ({symbol}, {base_available} USDT)")
     else:
         print(f"MEXC - ❌ Ошибка при создании ордера: {e.__class__.__name__}: {message}")
+    
+    # Выводим FILLED_AMOUNT:0 даже при ошибке
+    print("FILLED_AMOUNT:0")
     sys.exit(1)
