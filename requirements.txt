@@ -1,0 +1,5 @@
+ccxt==4.4.78
+Flask==2.2.5
+python-dotenv==1.1.0
+Requests==2.32.4
+Telethon==1.40.0

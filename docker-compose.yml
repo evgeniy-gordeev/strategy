@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./.env:/app/.env
+      - ./xyz415.log:/app/xyz415.log  # Монтируем xyz415.log для сохранения логов
+      - ./app.log:/app/app.log        # Оставляем app.log, если он используется
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped

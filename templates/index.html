@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbitrage Control</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .control-panel { display: flex; flex-direction: column; gap: 10px; }
+        .logs { margin-top: 20px; border: 1px solid #ccc; padding: 10px; max-height: 300px; overflow-y: auto; }
+        button { padding: 10px; cursor: pointer; }
+        button:disabled { cursor: not-allowed; opacity: 0.5; }
+        input[type="number"] { padding: 5px; }
+    </style>
+</head>
+<body>
+    <div class="control-panel">
+        <label>Deposit (USDT)</label>
+        <input type="number" id="deposit" placeholder="Enter deposit amount" min="0">
+
+        <div>
+            <button onclick="startScript()">Start</button>
+            <button onclick="stopScript()">Stop</button>
+        </div>
+
+        <div>
+            <button onclick="enableCheck()">Enable Check</button>
+            <button onclick="disableCheck()">Disable Check</button>
+        </div>
+
+        <div class="logs" id="logs"></div>
+    </div>
+
+    <script>
+        async function startScript() {
+            const deposit = document.getElementById('deposit').value;
+            if (!deposit) {
+                alert('Please enter a deposit amount');
+                return;
+            }
+
+            try {
+                const response = await fetch('/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ deposit })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function stopScript() {
+            try {
+                const response = await fetch('/stop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function enableCheck() {
+            try {
+                const response = await fetch('/toggle_check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ check_enabled: true })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function disableCheck() {
+            try {
+                const response = await fetch('/toggle_check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ check_enabled: false })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/logs');
+                const result = await response.json();
+                document.getElementById('logs').innerText = result.logs.join('\n');
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+            }
+        }
+
+        setInterval(fetchLogs, 5000);
+        fetchLogs();
+    </script>
+</body>
+</html>
